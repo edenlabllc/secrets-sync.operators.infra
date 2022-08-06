@@ -1,0 +1,53 @@
+name: goreleaser
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Get and push new tag version
+        run: |
+          echo "Git commit message:"
+          GIT_COMMIT_MSG="$(git log -1 --pretty=format:"%s")"
+          echo "${GIT_COMMIT_MSG}"
+
+          if [[ ! "${GIT_COMMIT_MSG}" =~ ^Merge\ pull\ request\ #[0-9]+\ from\ edenlabllc/release/(v[0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            >&2 echo "Pushes to master should be done via merges of PR requests from release/vN.N.N branches only."
+            >&2 echo "The expected message format (will be used for parsing a release tag):"
+            >&2 echo "Merge pull request #N from edenlabllc/release/vN.N.N"
+            exit 1
+          fi
+
+          VERSION="${BASH_REMATCH[1]}"
+
+          echo "Configure Git user.name and user.email."
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          echo "Add Git tag ${VERSION}."
+          git tag "${VERSION}"
+          git push origin "${VERSION}" -f
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

@@ -1,0 +1,8 @@
+.DS_Store
+.idea/
+.deps/
+etc/
+helmfile.yaml
+version.yaml
+sops-age-keys/
+dist/
