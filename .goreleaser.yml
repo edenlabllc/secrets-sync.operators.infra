@@ -1,0 +1,73 @@
+project_name: secrets-sync
+release:
+  github:
+    owner: edenlabllc
+    name: secrets-sync.operators.infra
+  name_template: '{{.ProjectName}}-v{{.Version}}'
+before:
+  hooks:
+#    - go get ./...
+    - go mod tidy
+builds:
+  - goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    gomips:
+      - hardfloat
+    targets:
+      - linux_amd64
+      - darwin_amd64
+    dir: .
+    main: .
+    ldflags:
+      - -s -w -X main.version={{.Tag}} -X main.commit={{.ShortCommit}} -X main.date={{.Date}}
+      - -X main.timestamp={{.Timestamp}} -X main.name={{.Binary}} -X main.builtBy=goreleaser
+      - -X main.target={{.Os}}_{{.Arch}}
+    binary: secrets-sync
+    env:
+      - CGO_ENABLED=0
+    builder: go
+    gobinary: go
+archives:
+  - replacements:
+    format: binary
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+dist: dist
+gomod:
+  gobinary: go
+  env:
+    - GOPROXY=direct
+snapshot:
+  name_template: 'v{{ incpatch .Version }}-next'
+source:
+  enabled: false
+changelog:
+  skip: true
+announce:
+  twitter:
+    enabled: false
+  reddit:
+    enabled: false
+  slack:
+    enabled: false
+    # Message template to use while publishing.
+    # Defaults to `{{ .ProjectName }} {{ .Tag }} is out! Check it out at {{ .ReleaseURL }}`
+    message_template: |
+      *Released new version of {{ .ProjectName }}: `{{.Tag}}`*
+      *Release notes:*
+        - <...>
+    # The name of the channel that the user selected as a destination for webhook messages.
+    channel: '#fhir-k8s-operators'
+    # Set your Webhook's user name.
+    username: 'GoReleaser'
+    # Emoji to use as the icon for this message. Overrides icon_url.
+    icon_emoji: "package"
+  discord:
+    enabled: false
+  teams:
+    enabled: false
