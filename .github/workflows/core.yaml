@@ -79,4 +79,6 @@ jobs:
           core_aws_secret_key: ${{ secrets.CORE_AWS_SECRET_ACCESS_KEY }}
           repository_name_prefix: "core."
           delete_image: false
-          scan_image: true
+          scan_image: false
+          # due to the incomprehensible behavior of the scanner to an already patched vulnerability
+          # https://git.alpinelinux.org/aports/commit/?id=6fb9696637619d164c685197c06c1f5306c4ee71
