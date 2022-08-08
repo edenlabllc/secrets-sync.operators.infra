@@ -15,7 +15,7 @@ RUN go mod tidy && \
     go build -ldflags "-w -s -X main.version=${VERSION} -X main.name=${NAME}" \
     -v -o ./"${NAME}_${GOOS}_${GOARCH}"
 
-FROM amd64/alpine:3.16
+FROM amd64/alpine:3.16.1
 
 ENV NAME=secrets-sync
 ENV GOOS=linux
