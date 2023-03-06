@@ -36,9 +36,9 @@ func (c *controller) iteratorDstNS(dstNamespaces []string, handlerSecret func(ns
 
 func (c *controller) deleteDstSecrets(key string) error {
 	secretName := func(secret types.Secret, ns string) string {
-		if _, ok := secret.OverWrite[ns]; ok {
-			if len(secret.OverWrite[ns].DstSecretName) > 0 {
-				return secret.OverWrite[ns].DstSecretName
+		if _, ok := secret.Overwrite[ns]; ok {
+			if len(secret.Overwrite[ns].DstSecretName) > 0 {
+				return secret.Overwrite[ns].DstSecretName
 			}
 		}
 
@@ -94,12 +94,12 @@ func (c *controller) createUpdateDstSecrets(obj interface{}) error {
 				func(ns string) error {
 					newSecret := srcSecret.DeepCopy()
 
-					if _, ok := secret.OverWrite[ns]; ok {
-						if len(secret.OverWrite[ns].DstSecretName) > 0 {
-							newSecret.SetName(secret.OverWrite[ns].DstSecretName)
+					if _, ok := secret.Overwrite[ns]; ok {
+						if len(secret.Overwrite[ns].DstSecretName) > 0 {
+							newSecret.SetName(secret.Overwrite[ns].DstSecretName)
 						}
 
-						if len(secret.OverWrite[ns].DstKeys) > 0 {
+						if len(secret.Overwrite[ns].DstKeys) > 0 {
 							for _, key := range keys {
 								delete(newSecret.Data, key)
 							}
@@ -108,9 +108,9 @@ func (c *controller) createUpdateDstSecrets(obj interface{}) error {
 							keys = []string{}
 
 							for key := range srcSecret.Data {
-								if _, ok := secret.OverWrite[ns].DstKeys[key]; ok {
-									newSecret.Data[secret.OverWrite[ns].DstKeys[key]] = srcSecret.Data[key]
-									keys = append(keys, key+"="+secret.OverWrite[ns].DstKeys[key])
+								if _, ok := secret.Overwrite[ns].DstKeys[key]; ok {
+									newSecret.Data[secret.Overwrite[ns].DstKeys[key]] = srcSecret.Data[key]
+									keys = append(keys, key+"="+secret.Overwrite[ns].DstKeys[key])
 								}
 							}
 						}

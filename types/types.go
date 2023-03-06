@@ -40,7 +40,7 @@ type ConfigSet struct {
 type Secret struct {
 	Name          string               `yaml:"name"`
 	SrcNamespace  string               `yaml:"src-namespace"`
-	OverWrite     map[string]DstSecret `yaml:"overwrite"`
+	Overwrite     map[string]DstSecret `yaml:"overwrite"`
 	DstNamespaces []string             `yaml:"dst-namespaces"`
 }
 
