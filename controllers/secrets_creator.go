@@ -35,13 +35,23 @@ func (c *controller) iteratorDstNS(dstNamespaces []string, handlerSecret func(ns
 }
 
 func (c *controller) deleteDstSecrets(key string) error {
+	secretName := func(secret types.Secret, ns string) string {
+		if _, ok := secret.OverWrite[ns]; ok {
+			if len(secret.OverWrite[ns].DstSecretName) > 0 {
+				return secret.OverWrite[ns].DstSecretName
+			}
+		}
+
+		return secret.Name
+	}
+
 	for _, secret := range c.SecretList.Secrets {
 		if secret.SrcNamespace+"/"+secret.Name == key {
 			klog.Infof("Src secret %s does not exist anymore\n", key)
 			if err := c.iteratorDstNS(
 				secret.DstNamespaces,
 				func(ns string) error {
-					dstSecret, err := c.ClientSet.CoreV1().Secrets(ns).Get(context.TODO(), secret.Name, metaV1.GetOptions{})
+					dstSecret, err := c.ClientSet.CoreV1().Secrets(ns).Get(context.TODO(), secretName(secret, ns), metaV1.GetOptions{})
 					if errors.IsNotFound(err) {
 						return nil
 					} else if statusError, isStatus := err.(*errors.StatusError); isStatus {
@@ -66,7 +76,10 @@ func (c *controller) deleteDstSecrets(key string) error {
 }
 
 func (c *controller) createUpdateDstSecrets(obj interface{}) error {
-	var keys []string
+	var (
+		keys     []string
+		saveKeys []string
+	)
 	srcSecret := obj.(*V1.Secret)
 
 	for key := range srcSecret.Data {
@@ -80,12 +93,36 @@ func (c *controller) createUpdateDstSecrets(obj interface{}) error {
 				secret.DstNamespaces,
 				func(ns string) error {
 					newSecret := srcSecret.DeepCopy()
+
+					if _, ok := secret.OverWrite[ns]; ok {
+						if len(secret.OverWrite[ns].DstSecretName) > 0 {
+							newSecret.SetName(secret.OverWrite[ns].DstSecretName)
+						}
+
+						if len(secret.OverWrite[ns].DstKeys) > 0 {
+							for _, key := range keys {
+								delete(newSecret.Data, key)
+							}
+
+							saveKeys = keys
+							keys = []string{}
+
+							for key := range srcSecret.Data {
+								if _, ok := secret.OverWrite[ns].DstKeys[key]; ok {
+									newSecret.Data[secret.OverWrite[ns].DstKeys[key]] = srcSecret.Data[key]
+									keys = append(keys, key+"="+secret.OverWrite[ns].DstKeys[key])
+								}
+							}
+						}
+					}
+
 					newSecret.SetNamespace(ns)
 					newSecret.ObjectMeta.OwnerReferences = []metaV1.OwnerReference{}
 					newSecret.Labels = map[string]string{}
 
 					newSecret.Annotations = make(map[string]string)
 					newSecret.Annotations[types.SyncAtAnnotation] = time.Now().Format(time.RFC3339)
+					newSecret.Annotations[types.SyncFromSecretAnnotation] = srcSecret.Name
 					newSecret.Annotations[types.SyncFromVersionAnnotation] = srcSecret.ResourceVersion
 					newSecret.Annotations[types.SyncKeysAnnotation] = strings.Join(keys, ",")
 
@@ -106,6 +143,7 @@ func (c *controller) createUpdateDstSecrets(obj interface{}) error {
 						return err
 					} else {
 						if !reflect.DeepEqual(dstSecret.Data, newSecret.Data) {
+							dstSecret.Annotations[types.SyncKeysAnnotation] = strings.Join(keys, ",")
 							dstSecret.Data = newSecret.Data
 							_, err := c.ClientSet.CoreV1().Secrets(ns).Update(context.TODO(),
 								dstSecret, metaV1.UpdateOptions{})
@@ -118,6 +156,7 @@ func (c *controller) createUpdateDstSecrets(obj interface{}) error {
 						}
 					}
 
+					keys = saveKeys
 					return nil
 				},
 			); err != nil {
