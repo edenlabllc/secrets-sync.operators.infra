@@ -11,6 +11,7 @@ import (
 const (
 	NamespaceKubeSystem       = "kube-system"
 	SyncAtAnnotation          = "secrets-sync.operators.infra/sync-at"
+	SyncFromSecretAnnotation  = "secrets-sync.operators.infra/sync-from-secret"
 	SyncFromVersionAnnotation = "secrets-sync.operators.infra/sync-from-version"
 	SyncKeysAnnotation        = "secrets-sync.operators.infra/sync-keys"
 	OneTermNotEqualKey        = "metadata.namespace"
@@ -37,9 +38,15 @@ type ConfigSet struct {
 }
 
 type Secret struct {
-	Name          string   `yaml:"name"`
-	SrcNamespace  string   `yaml:"src-namespace"`
-	DstNamespaces []string `yaml:"dst-namespaces"`
+	Name          string               `yaml:"name"`
+	SrcNamespace  string               `yaml:"src-namespace"`
+	Overwrite     map[string]DstSecret `yaml:"overwrite"`
+	DstNamespaces []string             `yaml:"dst-namespaces"`
+}
+
+type DstSecret struct {
+	DstSecretName string            `yaml:"dst-secret-name"`
+	DstKeys       map[string]string `yaml:"dst-keys"`
 }
 
 type OperatorInfo struct {
