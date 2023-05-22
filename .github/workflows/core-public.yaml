@@ -12,8 +12,7 @@ on:
     # For an action with build_push_image=false the following patterns are suggested:
     # - master
     branches:
-      - develop
-      - release/*
+      - master
 
 env:
   # AWS region of the AWS account storing images in ECR.
@@ -75,5 +74,6 @@ jobs:
           core_aws_access_key_id: ${{ secrets.CORE_AWS_ACCESS_KEY_ID }}
           core_aws_secret_key: ${{ secrets.CORE_AWS_SECRET_ACCESS_KEY }}
           repository_name_prefix: "core."
+          public_repository: true
           delete_image: false
-          scan_image: true
+          scan_image: false
