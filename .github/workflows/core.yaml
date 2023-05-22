@@ -13,7 +13,6 @@ on:
     # - master
     branches:
       - develop
-      - feature/*
       - release/*
 
 env:
