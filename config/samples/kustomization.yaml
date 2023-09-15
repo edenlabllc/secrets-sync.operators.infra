@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- internal_v1alpha1_secretssync.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples
