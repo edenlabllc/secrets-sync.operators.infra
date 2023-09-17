@@ -111,13 +111,10 @@ func (r *SecretsSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	//r.reqLogger.Info(fmt.Sprintf("List of %d copied secrets has been generated", len(newSecrets)))
-
 	if err := r.garbageCollector(newSecrets...); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	//fmt.Printf("%+v\n", newSecrets)
 	defSecret := &v1.Secret{}
 	for _, secret := range newSecrets {
 		if err := r.Client.Get(r.ctx, types.NamespacedName{Name: secret.Name, Namespace: secret.Namespace}, defSecret); err != nil {
@@ -277,6 +274,7 @@ func (r *SecretsSyncReconciler) garbageCollector(secrets ...*v1.Secret) error {
 			}
 
 			r.reqLogger.Info(fmt.Sprintf("Secret removed %s", item.Name))
+			r.updateStatusCRD("Updated", "", len(secrets))
 		}
 	}
 
