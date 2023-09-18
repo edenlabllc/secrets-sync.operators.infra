@@ -85,9 +85,14 @@ func (r *SecretsSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	for srcSecretName, val := range r.secretsSync.Spec.Secrets {
 		if err := r.Client.Get(r.ctx, types.NamespacedName{Name: val.SrcNamespace}, &v1.Namespace{}); err != nil {
 			if errors.IsNotFound(err) {
-				r.reqLogger.Error(err, fmt.Sprintf("Source namespace %s for secret %s not exists", val.SrcNamespace, srcSecretName))
-				r.updateStatusCRD("Failed",
-					fmt.Sprintf("Source namespace %s for secret %s not exists", val.SrcNamespace, srcSecretName), 0)
+				if r.secretsSync.Status.Phase != "Failed" {
+					r.reqLogger.Error(err, fmt.Sprintf("Source namespace %s for secret %s not exists",
+						val.SrcNamespace, srcSecretName))
+					r.updateStatusCRD("Failed",
+						fmt.Sprintf("Source namespace %s for secret %s not exists",
+							val.SrcNamespace, srcSecretName), 0)
+				}
+
 				continue
 			} else {
 				return ctrl.Result{}, err
@@ -96,11 +101,14 @@ func (r *SecretsSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			srcSecret := &v1.Secret{}
 			if err := r.Client.Get(r.ctx, types.NamespacedName{Name: srcSecretName, Namespace: val.SrcNamespace}, srcSecret); err != nil {
 				if errors.IsNotFound(err) {
-					r.reqLogger.Error(err, fmt.Sprintf("Source secret %s not exists in namespace %s",
-						srcSecretName, val.SrcNamespace))
-					r.updateStatusCRD("Failed",
-						fmt.Sprintf("Source secret %s not exists in namespace %s", srcSecretName, val.SrcNamespace),
-						0)
+					if r.secretsSync.Status.Phase != "Failed" {
+						r.reqLogger.Error(err, fmt.Sprintf("Source secret %s not exists in namespace %s",
+							srcSecretName, val.SrcNamespace))
+						r.updateStatusCRD("Failed",
+							fmt.Sprintf("Source secret %s not exists in namespace %s",
+								srcSecretName, val.SrcNamespace), 0)
+					}
+
 					continue
 				} else {
 					return ctrl.Result{}, err
