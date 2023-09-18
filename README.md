@@ -1,11 +1,11 @@
 # secrets-sync
-The `secrets sync` operator automatically copies existing secrets from other namespaces for current namespace.
+The `secrets sync` operator automatically copies existing secrets between namespaces.
 
 ## Description
-This `secrets-sync` operator allows to automatically copy secrets from different namespaces in the namespace for 
-which its `CustomResource` was created. It is also possible to override secrets names and keys when copying. 
-Two types of keys data are supported: `data` and `stringData`.
-The `secrets-sync` operator makes this possible via CR:
+The `secrets sync` operator automatically copies existing secrets between namespaces to the namespace for which its `CustomResource` was created. 
+It is also possible to override secrets names and keys when copying. 
+The two types of keys data are supported: `data` and `stringData`.
+The `secrets-sync` operator makes it possible via the CR:
 ```yaml
 spec:
   secrets: # List of secrets objects
