@@ -85,9 +85,9 @@ func (r *SecretsSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	for srcSecretName, val := range r.secretsSync.Spec.Secrets {
 		if err := r.Client.Get(r.ctx, types.NamespacedName{Name: val.SrcNamespace}, &v1.Namespace{}); err != nil {
 			if errors.IsNotFound(err) {
-				r.reqLogger.Error(err, fmt.Sprintf("Source namespace for secret %s not exists", srcSecretName))
+				r.reqLogger.Error(err, fmt.Sprintf("Source namespace %s for secret %s not exists", val.SrcNamespace, srcSecretName))
 				r.updateStatusCRD("Failed",
-					fmt.Sprintf("Source namespace for secret %s not exists", srcSecretName), 0)
+					fmt.Sprintf("Source namespace %s for secret %s not exists", val.SrcNamespace, srcSecretName), 0)
 				continue
 			} else {
 				return ctrl.Result{}, err
