@@ -85,9 +85,14 @@ func (r *SecretsSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	for srcSecretName, val := range r.secretsSync.Spec.Secrets {
 		if err := r.Client.Get(r.ctx, types.NamespacedName{Name: val.SrcNamespace}, &v1.Namespace{}); err != nil {
 			if errors.IsNotFound(err) {
-				r.reqLogger.Error(err, fmt.Sprintf("Source namespace for secret %s not exists", srcSecretName))
-				r.updateStatusCRD("Failed",
-					fmt.Sprintf("Source namespace for secret %s not exists", srcSecretName), 0)
+				if r.secretsSync.Status.Phase != "PartiallySynced" {
+					r.reqLogger.Error(err, fmt.Sprintf("Source namespace %s for secret %s not exist",
+						val.SrcNamespace, srcSecretName))
+					r.updateStatusCRD("PartiallySynced",
+						fmt.Sprintf("Source namespace %s for secret %s not exist",
+							val.SrcNamespace, srcSecretName), 0)
+				}
+
 				continue
 			} else {
 				return ctrl.Result{}, err
@@ -96,11 +101,14 @@ func (r *SecretsSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			srcSecret := &v1.Secret{}
 			if err := r.Client.Get(r.ctx, types.NamespacedName{Name: srcSecretName, Namespace: val.SrcNamespace}, srcSecret); err != nil {
 				if errors.IsNotFound(err) {
-					r.reqLogger.Error(err, fmt.Sprintf("Source secret %s not exists in namespace %s",
-						srcSecretName, val.SrcNamespace))
-					r.updateStatusCRD("Failed",
-						fmt.Sprintf("Source secret %s not exists in namespace %s", srcSecretName, val.SrcNamespace),
-						0)
+					if r.secretsSync.Status.Phase != "PartiallySynced" {
+						r.reqLogger.Error(err, fmt.Sprintf("Source secret %s not exist in namespace %s",
+							srcSecretName, val.SrcNamespace))
+						r.updateStatusCRD("PartiallySynced",
+							fmt.Sprintf("Source secret %s not exist in namespace %s",
+								srcSecretName, val.SrcNamespace), 0)
+					}
+
 					continue
 				} else {
 					return ctrl.Result{}, err
@@ -123,8 +131,8 @@ func (r *SecretsSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 					return ctrl.Result{}, err
 				}
 
-				r.reqLogger.Info(fmt.Sprintf("New secret %s has been created for namespace %s", secret.Name, secret.Namespace))
-				r.updateStatusCRD("Created", "", len(newSecrets))
+				r.reqLogger.Info(fmt.Sprintf("New secret %s has been synced for namespace %s", secret.Name, secret.Namespace))
+				r.updateStatusCRD("Synced", "", len(newSecrets))
 				continue
 			} else {
 				return ctrl.Result{}, err
@@ -140,8 +148,8 @@ func (r *SecretsSyncReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				return ctrl.Result{}, err
 			}
 
-			r.reqLogger.Info(fmt.Sprintf("Secret %s has been updated due to a difference in the data field", secret.Name))
-			r.updateStatusCRD("Updated", "", len(newSecrets))
+			r.reqLogger.Info(fmt.Sprintf("Secret %s has been synced due to a difference in the data field", secret.Name))
+			r.updateStatusCRD("Synced", "", len(newSecrets))
 		}
 	}
 
@@ -274,7 +282,7 @@ func (r *SecretsSyncReconciler) garbageCollector(secrets ...*v1.Secret) error {
 			}
 
 			r.reqLogger.Info(fmt.Sprintf("Secret removed %s", item.Name))
-			r.updateStatusCRD("Updated", "", len(secrets))
+			r.updateStatusCRD("Synced", "", len(secrets))
 		}
 	}
 
