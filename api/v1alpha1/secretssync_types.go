@@ -34,7 +34,7 @@ type SecretsSyncStatus struct {
 	CreatedTime *metav1.Time `json:"createdTime,omitempty"`
 	Error       string       `json:"error,omitempty"`
 	Phase       string       `json:"phase,omitempty"`
-	Count       int          `json:"count,omitempty"`
+	Count       int          `json:"count"`
 }
 
 //+kubebuilder:object:root=true
