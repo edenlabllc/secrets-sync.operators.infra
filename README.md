@@ -1,11 +1,19 @@
-# secrets-sync
-The `secrets sync` operator automatically copies existing secrets between namespaces.
+# Secrets Sync operator
+
+[![Release](https://img.shields.io/github/v/release/edenlabllc/secrets-sync.operators.infra.svg?style=for-the-badge)](https://github.com/edenlabllc/secrets-sync.operators.infra/releases/latest)
+[![Software License](https://img.shields.io/github/license/edenlabllc/secrets-sync.operators.infra.svg?style=for-the-badge)](LICENSE)
+[![Powered By: Edenlab](https://img.shields.io/badge/powered%20by-edenlab-8A2BE2.svg?style=for-the-badge)](https://edenlab.io)
+
+The Secrets Sync operator automatically copies existing secrets between namespaces.
 
 ## Description
-The `secrets sync` operator automatically copies existing secrets between namespaces to the namespace for which its `CustomResource` was created. 
-It is also possible to override secrets names and keys when copying. 
+
+The Secrets Sync operator automatically copies existing secrets between namespaces to the namespace for which
+its `CustomResource` was created.
+It is also possible to override secrets names and keys when copying.
 The two types of keys data are supported: `data` and `stringData`.
-The `secrets-sync` operator makes it possible via the CR:
+The Secrets Sync operator makes it possible via the CR:
+
 ```yaml
 spec:
   secrets: # List of secrets objects
@@ -24,10 +32,14 @@ spec:
 ```
 
 ## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
-**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+
+You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for
+testing, or run against a remote cluster.
+**Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever
+cluster `kubectl cluster-info` shows).
 
 ### Running on the cluster
+
 1. Install Instances of Custom Resources:
 
 ```sh
@@ -47,6 +59,7 @@ make deploy IMG=<some-registry>/core.secrets-sync.operators.infra:tag
 ```
 
 ### Uninstall CRDs
+
 To delete the CRDs from the cluster:
 
 ```sh
@@ -54,6 +67,7 @@ make uninstall
 ```
 
 ### Undeploy controller
+
 UnDeploy the controller from the cluster:
 
 ```sh
@@ -63,12 +77,16 @@ make undeploy
 ## Contributing
 
 ### How it works
-This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/).
+
+This project aims to follow the
+Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/).
 
 It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/),
-which provide a reconcile function responsible for synchronizing resources until the desired state is reached on the cluster.
+which provide a reconcile function responsible for synchronizing resources until the desired state is reached on the
+cluster.
 
 ### Test It Out
+
 1. Install the CRDs into the cluster:
 
 ```sh
@@ -84,6 +102,7 @@ make run
 **NOTE:** You can also run this in one step by running: `make install run`
 
 ### Modifying the API definitions
+
 If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
 
 ```sh
