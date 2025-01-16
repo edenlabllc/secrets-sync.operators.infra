@@ -1,5 +1,5 @@
 /*
-Copyright 2023 @apanasiuk-el edenlabllc.
+Copyright 2025 Edenlab
 */
 
 // Package v1alpha1 contains API Schema definitions for the internal v1alpha1 API group
