@@ -30,8 +30,16 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
+      - name: Checkout Gitflow CI action repository
+        uses: actions/checkout@v4
+        with:
+          repository: edenlabllc/gitflow.ci.action
+          ref: v1
+          token: ${{ secrets.GH_TOKEN_REPO_FULL_ACCESS }}
+          path: .github/actions/gitflow.ci.action
+
       - name: Run Gitflow CI action
-        uses: edenlabllc/gitflow.ci.action@v1
+        uses: ./.github/actions/gitflow.ci.action
         with:
           core_aws_region: ${{ env.CORE_AWS_REGION }}
           core_aws_access_key_id: ${{ secrets.CORE_AWS_ACCESS_KEY_ID }}

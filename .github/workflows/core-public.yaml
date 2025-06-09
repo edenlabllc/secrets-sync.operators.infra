@@ -35,10 +35,10 @@ jobs:
           repository: edenlabllc/gitflow.ci.action
           ref: v1
           token: ${{ secrets.GH_TOKEN_REPO_FULL_ACCESS }}
-          path: .github/actions/gitflow
+          path: .github/actions/gitflow.ci.action
 
       - name: Run Gitflow CI action
-        uses: ./.github/actions/gitflow
+        uses: ./.github/actions/gitflow.ci.action
         with:
           core_aws_region: ${{ env.CORE_AWS_REGION }}
           core_aws_access_key_id: ${{ secrets.CORE_AWS_ACCESS_KEY_ID }}
